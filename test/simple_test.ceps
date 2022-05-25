@@ -1,0 +1,68 @@
+learn_structs(
+	input{
+		A{
+			name{"a name";};
+			imports{M1;M2;M3;};
+			exports{E1;};
+			version{1;};
+		};
+	}
+);
+
+A{
+	name{"a name";};
+	imports{M1;M2;M3;};
+	exports{E1;};
+	version{1;};
+};
+
+A{
+	name{"a name";};
+	imports{M1;M2;M3;};
+	version{1;};
+};
+
+kind Event;
+
+expect{
+	sm{
+		A;
+		Event read_name;
+		Event read_imports;
+		Event read_exports;
+		Event read_version;
+		Event eof;
+
+		states{
+		 Initial;
+		 name;
+		 imports;
+		 exports;
+		 version;
+		 Final;	
+		};
+
+		t{Initial; name; read_name;};
+		t{name;imports;read_imports;};
+		t{imports;version;read_version;};
+		t{imports;exports;read_exports;};
+		t{exports;version;read_version;};
+		t{version;Final;eof;};
+	};
+};
+
+root.expect.sm;
+
+print ("result = ",root.result.content(),"\n\n");
+Simulation{
+	Event read_name;
+	Event read_imports;
+	Event read_exports;
+	Event read_version;
+	Event eof;
+	Start{A;};
+	read_name;
+	read_imports;
+	read_version;
+	eof;
+};
