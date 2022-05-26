@@ -7,7 +7,7 @@ val r = learn_struct(
         version{1;};
     };
 
-    package{
+/*    package{
         name{"a name";};
         imports{M1;M2;M3;};
         version{1;};
@@ -42,8 +42,8 @@ val r = learn_struct(
         exports{E1;};
         imports{M1;M2;M3;};
         version{1;};
-    };
+    };*/
  }
 );
 
-print(r);
+print("\n\n",r,"\n");

@@ -114,13 +114,26 @@ namespace learn_structs{
     using namespace ceps::interpreter;
 
     class Spec{
+            size_t cur_state{};
         public:
             struct state_t{
-
+                size_t pos;
+                string id;               
+                string name;
+                vector<size_t> neighbors;                
             };
-            void init_position();
-            void consume(string);
+            vector<state_t> states;
+            Spec(){
+                states.push_back({{0},{"Initial"}, {}, {1}}); // Initial
+                states.push_back({{1},{"Final"}, {}, {} }); // Final
+            }
+            void init_position(){
+                cur_state = {};
+            }
+            void move_to(state_t);
             optional<state_t> next(string);
+            state_t insert(string);
+            void print(ostream& os, size_t from);
     };
 
     class Learner{
@@ -150,11 +163,45 @@ namespace learn_structs{
                 //cout << cur_input_elem << " --\n";
                 auto cur_state = spec.next(name(cur_input_elem));
                 if (!cur_state){
-
-                } else spec.consume(name(cur_input_elem));
+                    spec.move_to(spec.insert(name(cur_input_elem)));
+                } else spec.move_to(*cur_state);
             }
         }
         return spec;
+    }
+
+    optional<Spec::state_t> Spec::next(string requested_name){
+        auto& e = states[cur_state];
+        for (auto it: e.neighbors)
+            if (states[it].name == requested_name) return states[it];
+        return {};
+    }
+
+    void Spec::move_to(state_t s){
+        cur_state = s.pos;        
+    }
+    
+    Spec::state_t Spec::insert(string requested_name){
+        auto it = cur_state;
+        for( ;it != states.size();++it){
+            if (requested_name == states[it].name) 
+             break;
+        }
+        bool not_found = it == states.size();
+        if (not_found){
+            state_t new_state{it,requested_name,requested_name,states[cur_state].neighbors};
+            states[cur_state].neighbors.push_back(it);
+            states.push_back(new_state);
+            return new_state;
+        }
+    }
+
+    void Spec::print(ostream& os, size_t from){
+        for (auto it : states[from].neighbors){
+            os << states[from].id;
+            os << " -> " << states[it].id << " ";
+        }
+        for (auto it : states[from].neighbors) print(os,it);
     }
 }
 
@@ -171,7 +218,8 @@ ceps::ast::node_t learn_structs::plugin_entrypoint(ceps::ast::node_callparameter
     auto& ceps_struct = *as_struct_ptr(data);
 
     Learner learner;
-    learner.learn(children(ceps_struct));
+    auto spec = learner.learn(children(ceps_struct));
+    spec.print(cout,0);
 
     return result;
 }
