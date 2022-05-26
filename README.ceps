@@ -1,0 +1,184 @@
+
+label _ title = "Learn a struct.";
+
+
+comment{
+"
+Given a sequence of structs (S_1, S_2, ..., S_n) , deduce a specification Spec -- details how such a spec should look like will be filled in later .   
+";
+};
+
+package{
+	name{"a name";};
+	imports{M1;M2;M3;};
+	exports{E1;};
+	version{1;};
+};
+
+package{
+	name{"a name";};
+	imports{M1;M2;M3;};
+	version{1;};
+};
+
+package{
+	name{"a name";};
+    owner{"Smith";};
+	imports{M1;M2;M3;};
+	version{1;};
+};
+
+package{
+	name{"a name";};
+    owner{"Smith";};
+	exports{E1;};
+	imports{M1;M2;M3;};
+	version{1;};
+};
+
+package{
+	name{"a name";};
+    owner{"Smith";};
+    owner{"Multiple owners allowed.";};
+	exports{E1;};
+	imports{M1;M2;M3;};
+	version{1;};
+};
+
+package{
+    owner{"random guy";};
+	exports{E1;};
+	imports{M1;M2;M3;};
+	version{1;};
+};
+
+comment{"
+ After reading first instance of struct package:
+";};
+
+sm{
+ S1;
+ states{Initial; Final; name; imports; exports; version;};
+ t{Initial; name;};
+ t{name; imports;};
+ t{imports; exports;};
+ t{exports; version;};
+ t{version; Final;};
+};
+
+comment{"
+ After reading second instance of struct package:
+";};
+
+sm{
+ S2;
+ states{Initial; Final;name; imports; exports; version;};
+ t{Initial; name;};
+ t{name; imports;}; 
+ t{imports; exports;};  
+ t{imports; version;};
+ t{exports; version;};
+ t{version; Final;};
+};
+
+comment{"
+ After reading third instance of struct package:
+";};
+
+sm{
+ S3;
+ states{Initial; Final;name; imports; exports; version; owner;};
+
+ t{Initial; name;};
+ t{name; imports;};
+
+ t{name; owner;};
+ t{owner; imports;};
+
+ t{imports; exports;};
+ t{imports; version;};
+ t{exports; version;};
+ t{version; Final;};
+};
+ 
+
+comment{"
+ After reading fourth instance of struct package:
+";};
+
+sm{
+ S4;
+ states{Initial; Final;name; imports; exports; version; owner;};
+ 
+ t{Initial; name;};
+ t{name; imports;};
+
+ t{name; owner;};
+ t{owner; imports;};
+ t{owner; exports;};
+
+ t{imports; exports;};
+ t{imports; version;};
+ t{exports; version;};
+ t{version; Final;};
+};
+
+comment{"
+ After reading fifth instance of struct package:
+";};
+
+sm{
+ S5;
+ states{Initial; Final;name; imports; exports; version; owner; owner_1;};
+ 
+ t{Initial; name;};
+ t{name; imports;};
+
+ t{name; owner;};
+ t{owner; imports;};
+ t{owner; exports;};
+
+ t{owner; owner_1;};
+ t{owner_1; imports;};
+ t{owner_1; exports;};
+
+ t{imports; exports;};
+ t{imports; version;};
+ t{exports; version;};
+ t{version; Final;};
+};
+
+comment{"
+ After reading sixth instance of struct package:
+";};
+
+sm{
+ S6;
+ states{Initial; Final;name; imports; exports; version; owner; owner_1;};
+ 
+ t{Initial; name;};
+
+ t{Initial; exports;};
+
+ t{name; imports;};
+
+ t{name; owner;};
+ t{owner; imports;};
+ t{owner; exports;};
+
+ t{owner; owner_1;};
+ t{owner_1; imports;};
+ t{owner_1; exports;};
+
+ t{imports; exports;};
+ t{imports; version;};
+ t{exports; version;};
+ t{version; Final;};
+};
+
+
+
+
+
+
+
