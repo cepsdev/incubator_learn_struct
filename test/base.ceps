@@ -77,6 +77,55 @@ val run_2 = learn_struct(
 
 run_2.result.state_machine.sm;
 
+val run_3 = learn_struct(
+ input{
+     test_set{
+         root.test_set.package.at(0);
+         root.test_set.package.at(1);
+         root.test_set.package.at(2);
+     };
+     spec_name{
+         Spec_package_run_3;
+     };
+ }
+);
+
+run_3.result.state_machine.sm;
+
+val run_4 = learn_struct(
+ input{
+     test_set{
+         root.test_set.package.at(0);
+         root.test_set.package.at(1);
+         root.test_set.package.at(2);
+         root.test_set.package.at(3);
+     };
+     spec_name{
+         Spec_package_run_4;
+     };
+ }
+);
+
+run_4.result.state_machine.sm;
+
+val run_5 = learn_struct(
+ input{
+     test_set{
+         root.test_set.package.at(0);
+         root.test_set.package.at(1);
+         root.test_set.package.at(2);
+         root.test_set.package.at(3);
+         root.test_set.package.at(4);
+     };
+     spec_name{
+         Spec_package_run_5;
+     };
+ }
+);
+
+run_5.result.state_machine.sm;
+
+/*
 Simulation{
     Start{Spec_package_run_1;};
     kind Event;
@@ -93,4 +142,4 @@ Simulation{
     kind Event;
     Event name, version, exports, imports, eof;
     name; imports; version; eof;
-};
+};*/

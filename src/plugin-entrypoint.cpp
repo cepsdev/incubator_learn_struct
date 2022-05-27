@@ -137,6 +137,7 @@ namespace learn_structs{
             }
             string name;          
         public:
+            using state_it = size_t;
             struct state_t{
                 size_t pos;
                 string id;               
@@ -153,11 +154,15 @@ namespace learn_structs{
                 cur_state = {};
             }
             void move_to(state_t);
+            void move_to(state_it);
             optional<state_t> next(string);
             state_t insert(string);
+            void connect(state_it from, state_it to);
             void print(ostream& os, size_t from);
             node_t as_state_machine();
             void set_name(string new_name) {name = new_name;}
+            optional<size_t> find_by_name(string, size_t start_index = {});
+            auto get_current_state_idx() const {return cur_state;}
     };
 
     class Learner{
@@ -173,6 +178,7 @@ namespace learn_structs{
 }
 
 namespace learn_structs{
+    
     Spec Learner::learn(structs_t structs ){
         Spec spec;
         for(auto e: structs){
@@ -184,14 +190,46 @@ namespace learn_structs{
                 auto cur_elem_raw = children(the_struct)[i];
                 if (!is<Ast_node_kind::structdef>(cur_elem_raw)) continue;
                 auto& cur_input_elem = *as_struct_ptr(cur_elem_raw);
+                auto name_of_current_input = name(cur_input_elem);
                 //cout << cur_input_elem << " --\n";
-                auto cur_state = spec.next(name(cur_input_elem));
-                if (!cur_state){
-                    spec.move_to(spec.insert(name(cur_input_elem)));
-                } else spec.move_to(*cur_state);
+                auto next_state = spec.next(name_of_current_input);
+                if (!next_state){
+                    //INVARIANT: spec.cur_state has no transition under cur_input_elem
+                    
+                    // Case a: there is no previously learned instance of cur_input_elem
+                    // Case b: cur_input_elem is known but no transition from cur_state leads to an instance
+                    // Case b-1: an instance lies 'ahead' of cur_state, i.e. index(instance) > cur_state
+                    // Case b-2: an instance lies 'in front of' cur_state, i.e. index(instance) < cur_state
+                    // Case b-3: cur_state is an instance, i.e. index(instance) = cur_state
+                    
+                    auto it = spec.find_by_name(name_of_current_input);
+                    if (!it /*Case a*/)
+                        spec.move_to(spec.insert(name_of_current_input));
+                    else /*Case b*/ {
+                        if (*it < spec.get_current_state_idx()){ /*check for cases b-1/b-3*/
+                         auto tit = it;
+                         for(; (tit = spec.find_by_name(name_of_current_input, *tit + 1)).has_value() ; it = *tit){
+                            if (*it == spec.get_current_state_idx()) break;
+                         }
+                        }
+                        //INVARIANT: Cases are clear ('it' points to the correct index in each possible b case)
+                        if (*it == spec.get_current_state_idx()){ //b-3
+
+                        } else { // b-1, b-2
+                            spec.connect(spec.get_current_state_idx(), *it);
+                            spec.move_to(*it);
+                        }
+                    }
+                } else spec.move_to(*next_state);
             }
         }
         return spec;
+    }
+
+    optional<size_t> Spec::find_by_name(string requested_name, size_t start_index){
+        for(auto i = start_index; i < states.size(); ++i )
+         if (states[i].name == requested_name) return i;
+        return {};
     }
 
     optional<Spec::state_t> Spec::next(string requested_name){
@@ -203,6 +241,14 @@ namespace learn_structs{
 
     void Spec::move_to(state_t s){
         cur_state = s.pos;        
+    }
+
+    void Spec::move_to(Spec::state_it sit){
+        cur_state = sit;        
+    }
+
+    void Spec::connect(state_it from, state_it to){
+            states[from].neighbors.push_back(to);                
     }
     
     Spec::state_t Spec::insert(string requested_name){
