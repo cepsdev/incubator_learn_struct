@@ -163,6 +163,7 @@ namespace learn_structs{
             void set_name(string new_name) {name = new_name;}
             optional<size_t> find_by_name(string, size_t start_index = {});
             auto get_current_state_idx() const {return cur_state;}
+            bool connected(state_it from, state_it to);
     };
 
     class Learner{
@@ -216,6 +217,10 @@ namespace learn_structs{
                         if (*it == spec.get_current_state_idx()){ //b-3
 
                         } else { // b-1, b-2
+                            if (spec.connected(*it,spec.get_current_state_idx()) ){
+                                //cycle
+                                cerr << "cycle\n";
+                            }
                             spec.connect(spec.get_current_state_idx(), *it);
                             spec.move_to(*it);
                         }
@@ -245,6 +250,11 @@ namespace learn_structs{
 
     void Spec::move_to(Spec::state_it sit){
         cur_state = sit;        
+    }
+
+    bool Spec::connected(state_it from, state_it to){
+        for (auto e: states[from].neighbors) if (e == to) return true;
+        return false;
     }
 
     void Spec::connect(state_it from, state_it to){
