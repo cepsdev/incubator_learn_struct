@@ -36,18 +36,19 @@ namespace utils{
     node_struct_t rec(string name, uint64_t v);
     node_struct_t rec(string name, string v);
     node_struct_t rec(string name);
+    node_struct_t rec(string name, node_t n);
 
     template<typename T> node_t strct(T);
 
 
 
-    template<typename T> node_struct_t rec(string name, T v){
-        return rec(name,children(as_struct_ref(strct<T>(v))));
+    template<typename T> node_struct_t rec(T v){
+        return v;
     }
 
     template<typename T, typename... Ts> node_struct_t rec(string name, T a1, Ts... rest){
         auto r = rec(name,rest...);
-        if (a1) children(*r).insert(children(*r).begin(),a1);
+        if (a1 && r) children(*r).insert(children(*r).begin(),a1);
         return r;
     }
 }
@@ -75,6 +76,11 @@ namespace utils{
         return rec(name,(int)v);
     }
 
+    node_struct_t rec(string name, node_t n){
+        auto r = mk_struct(name); if (n != nullptr) children(*r).push_back(n);
+        return r;    
+
+    }
     node_struct_t rec(string name, int64_t v){
         auto r = mk_struct(name); auto r2 = mk_int64_node(v); children(*r).push_back(r2);
         return r;    
@@ -105,6 +111,12 @@ namespace utils{
         auto r = mk_struct(name);
         return r;
     }
+   
+   node_t id(string name){
+        auto r = new Identifier(name);
+        return r;
+    }
+    
 }
  
 
@@ -115,6 +127,15 @@ namespace learn_structs{
 
     class Spec{
             size_t cur_state{};
+            optional<size_t> boundary_state{};
+            bool is_boundary(size_t state){
+                if (!boundary_state) return false;
+                return *boundary_state == state;
+            }
+            void set_boundary(size_t state){
+                boundary_state = state;
+            }
+            string name;          
         public:
             struct state_t{
                 size_t pos;
@@ -126,6 +147,7 @@ namespace learn_structs{
             Spec(){
                 states.push_back({{0},{"Initial"}, {}, {1}}); // Initial
                 states.push_back({{1},{"Final"}, {}, {} }); // Final
+                boundary_state = 0;
             }
             void init_position(){
                 cur_state = {};
@@ -134,6 +156,8 @@ namespace learn_structs{
             optional<state_t> next(string);
             state_t insert(string);
             void print(ostream& os, size_t from);
+            node_t as_state_machine();
+            void set_name(string new_name) {name = new_name;}
     };
 
     class Learner{
@@ -190,6 +214,15 @@ namespace learn_structs{
         bool not_found = it == states.size();
         if (not_found){
             state_t new_state{it,requested_name,requested_name,states[cur_state].neighbors};
+            if (is_boundary(cur_state))
+            {
+                size_t i = 0;
+                for(;i != states[cur_state].neighbors.size(); ++i)
+                 if (states[cur_state].neighbors[i] == 1) break;
+                if (i != states[cur_state].neighbors.size())
+                    states[cur_state].neighbors.erase(states[cur_state].neighbors.begin() + i);
+                set_boundary(new_state.pos);
+            }
             states[cur_state].neighbors.push_back(it);
             states.push_back(new_state);
             return new_state;
@@ -202,6 +235,37 @@ namespace learn_structs{
             os << " -> " << states[it].id << " ";
         }
         for (auto it : states[from].neighbors) print(os,it);
+    }
+    node_t Spec::as_state_machine(){
+        using namespace utils;
+        auto get_all_states = [&](){
+            vector<node_t> r{/*mk_string("Initial"), mk_string("Final")*/};
+            vector<string> v;
+            for (auto e: states ){
+                if (e.id.length() ) v.push_back(e.id);
+                else if (e.name.length()) v.push_back(e.name);
+            }            
+            for (auto e: v)
+                r.push_back(id(e));
+            return r;
+        };
+        auto get_all_transitions = [&](){
+            vector<node_t> t;
+            for(auto s : states){
+                if (!s.id.length() && !s.name.length()) continue;
+                for (auto i : s.neighbors){
+                    t.push_back(
+                        rec("t", 
+                            id(s.id), 
+                            id(states[i].id), 
+                            ceps::ast::mk_symbol(  i == 1 ? "eof" : states[i].name , string{"Event"}) ));
+                }
+            }            
+            return t;
+        };
+        return rec("sm", 
+                    id(name),
+                    rec("states",get_all_states()), get_all_transitions() );
     }
 }
 
@@ -216,12 +280,20 @@ ceps::ast::node_t learn_structs::plugin_entrypoint(ceps::ast::node_callparameter
     if (!is<Ast_node_kind::structdef>(data)) return result;
 
     auto& ceps_struct = *as_struct_ptr(data);
+    Nodeset ns{children(ceps_struct)};
+    auto test_set = ns["test_set"];
+    auto spec_name = ns["spec_name"].as_str();
 
     Learner learner;
-    auto spec = learner.learn(children(ceps_struct));
-    spec.print(cout,0);
-
-    return result;
+    auto spec = learner.learn(test_set.nodes());
+    //spec.print(cout,0);
+    if (spec_name.length()) spec.set_name(spec_name) ;
+    else if (children(ceps_struct).size() && is<Ast_node_kind::structdef>(children(ceps_struct)[0]) ) 
+        spec.set_name("Spec_"+name(as_struct_ref(children(ceps_struct)[0])));
+    
+    auto sm = spec.as_state_machine();
+    //cout << *sm << "\n";
+    return utils::rec("result", utils::rec("state_machine", sm));
 }
 
 extern "C" void init_plugin(IUserdefined_function_registry* smc)

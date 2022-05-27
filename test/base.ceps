@@ -1,5 +1,10 @@
-val r = learn_struct(
- input{
+comment {
+"
+Learning structs.
+";
+};
+
+test_set{
     package{
         name{"a name";};
         imports{M1;M2;M3;};
@@ -7,7 +12,7 @@ val r = learn_struct(
         version{1;};
     };
 
-/*    package{
+    package{
         name{"a name";};
         imports{M1;M2;M3;};
         version{1;};
@@ -42,8 +47,50 @@ val r = learn_struct(
         exports{E1;};
         imports{M1;M2;M3;};
         version{1;};
-    };*/
+    };
+};
+
+val run_1 = learn_struct(
+ input{
+     test_set{
+         root.test_set.package.at(0);
+     };
+     spec_name{
+         Spec_package_run_1;
+     };
  }
 );
 
-print("\n\n",r,"\n");
+run_1.result.state_machine.sm;
+
+val run_2 = learn_struct(
+ input{
+     test_set{
+         root.test_set.package.at(0);
+         root.test_set.package.at(1);
+     };
+     spec_name{
+         Spec_package_run_2;
+     };
+ }
+);
+
+run_2.result.state_machine.sm;
+
+Simulation{
+    Start{Spec_package_run_1;};
+    kind Event;
+    Event name, version, exports, imports, eof;
+    name;
+    imports;
+    exports;
+    version;
+    eof;
+};
+
+Simulation{
+    Start{Spec_package_run_2;};
+    kind Event;
+    Event name, version, exports, imports, eof;
+    name; imports; version; eof;
+};
