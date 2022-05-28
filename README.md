@@ -41,6 +41,6 @@ We implement a set of algorithms which take  *testset_of_structs* as input and o
 
 Construct a simple state machine which generalizes the input 'conservatively'. 
 
-Test is in ![test/base.ceps](test/base.ceps)
+Test is in test/base.ceps.
 
 ![](img/status_implementation.png)
