@@ -44,3 +44,7 @@ Construct a simple state machine which generalizes the input 'conservatively'.
 Test is in test/base.ceps.
 
 ![](img/status_implementation.png)
+
+#### Comment
+
+In step 4 the algorithm overgeneralizes by allowing an unbounded sequence of alternating imports/exports substructures. Need Fix.
