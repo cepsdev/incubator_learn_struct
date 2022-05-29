@@ -48,3 +48,29 @@ Test is in test/base.ceps.
 #### Comment
 
 In step 4 the algorithm overgeneralizes by allowing an unbounded sequence of alternating imports/exports substructures. Need Fix.
+
+### Step 2
+
+![](img/status_implementation_step2.png)
+
+Comment:
+
+Learning 
+```
+ package{
+        name{"a name";};
+        owner{"Smith";};
+        exports{E1;};
+        imports{M1;M2;M3;};
+        version{1;};
+    };
+
+```
+doesn't lead to a cycle *exports <-> import* now, the involved states in a direct cycle are split now. The algorithm 'learns' that a single *exports* can be followed/preceded by a single *imports* and __not__ that an unbounded number of juxtaposed imports/exports are allowed. Last step still wrong (as depicted by 
+the picture at the verry right).
+
+
+
+
+
+
