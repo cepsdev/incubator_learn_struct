@@ -135,7 +135,9 @@ namespace learn_structs{
             void set_boundary(size_t state){
                 boundary_state = state;
             }
-            string name;          
+            string name;
+            map<string,int> name2occurence_count;
+            string new_id(string);
         public:
             using state_it = size_t;
             struct state_t{
@@ -164,6 +166,8 @@ namespace learn_structs{
             optional<size_t> find_by_name(string, size_t start_index = {});
             auto get_current_state_idx() const {return cur_state;}
             bool connected(state_it from, state_it to);
+            state_it copy(state_it);
+            vector<state_it> predecessors(state_it);
     };
 
     class Learner{
@@ -219,16 +223,53 @@ namespace learn_structs{
                         } else { // b-1, b-2
                             if (spec.connected(*it,spec.get_current_state_idx()) ){
                                 //cycle
-                                cerr << "cycle\n";
+                                //TODO: Refactor (too involved)
+                                auto from = spec.get_current_state_idx();
+                                auto to = *it;
+                                auto new_from = spec.copy(from);
+                               
+                                auto new_from_pred = spec.predecessors(from);
+                                
+                                for(auto e : new_from_pred)
+                                    if (e != *it) 
+                                        for(auto& succ: spec.states[e].neighbors) 
+                                            if (succ == from){ succ = new_from;}
+                                auto new_to = spec.copy(*it);
+                                size_t pos_from_in_to_neighbors = 0;
+                                for(; spec.states[new_to].neighbors.size() > pos_from_in_to_neighbors; ++pos_from_in_to_neighbors)
+                                    if (spec.states[new_to].neighbors[pos_from_in_to_neighbors] == from) break;
+                                spec.states[new_to].neighbors.erase(spec.states[new_to].neighbors.begin() + pos_from_in_to_neighbors );
+                                spec.connect(new_from, new_to);
+                                spec.move_to(new_to);
+                            } else {
+                                spec.connect(spec.get_current_state_idx(), *it);
+                                spec.move_to(*it);
                             }
-                            spec.connect(spec.get_current_state_idx(), *it);
-                            spec.move_to(*it);
                         }
                     }
                 } else spec.move_to(*next_state);
             }
         }
         return spec;
+    }
+
+    vector<Spec::state_it> Spec::predecessors(state_it s){
+        vector<Spec::state_it> r;
+        for(auto e: states)
+         for (auto ee: e.neighbors) if (ee == s) r.push_back(e.pos);
+        return r;
+    }
+
+    string Spec::new_id(string name) {
+        auto i = name2occurence_count[name]++;
+        return name+"_"+to_string(i);
+    }
+
+    Spec::state_it Spec::copy(state_it it){
+        states.push_back(states[it]);
+        states[states.size() - 1].id = new_id(states[it].name);
+        states[states.size() - 1].pos = states.size() - 1; 
+        return states.size() - 1;
     }
 
     optional<size_t> Spec::find_by_name(string requested_name, size_t start_index){
