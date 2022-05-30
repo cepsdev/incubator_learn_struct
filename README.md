@@ -1,4 +1,4 @@
-# Incubator: Learning the structure of structs, e.g. json objects (Grammatical Inference/Grammar Inference/Grammar Induction)
+# Incubator (cepS): Learning the structure of structs, e.g. json objects (Grammatical Inference/Grammar Inference/Grammar Induction)
 
 ## What it is about?
 
@@ -68,6 +68,23 @@ Learning
 ```
 doesn't lead to a cycle *exports <-> import* now, the involved states in a direct cycle are split now. The algorithm 'learns' that a single *exports* can be followed/preceded by a single *imports* and __not__ that an unbounded number of juxtaposed imports/exports are allowed. Last step still wrong (as depicted by 
 the picture at the verry right).
+
+### Step 3
+
+Missing: Learning multiple juxtaposed occurences of the same element. Seeing the following struct
+
+```
+    package{
+        name{"a name";};
+        owner{"Smith";};
+        owner{"Multiple owners allowed.";};
+        exports{E1;};
+        imports{M1;M2;M3;};
+        version{1;};
+    };
+```
+
+the algorithm should learn that there can be up to two *owners*-fields.
 
 
 
