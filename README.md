@@ -100,6 +100,7 @@ the algorithm should learn that there can be up to two *owner*-fields:
 
 ```
 
+![](img/status_implementation4.png)
 
 
 
