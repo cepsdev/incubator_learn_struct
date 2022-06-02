@@ -125,6 +125,24 @@ val run_5 = learn_struct(
 
 run_5.result.state_machine.sm;
 
+val run_6 = learn_struct(
+ input{
+     test_set{
+         root.test_set.package.at(0);
+         root.test_set.package.at(1);
+         root.test_set.package.at(2);
+         root.test_set.package.at(3);
+         root.test_set.package.at(4);
+         root.test_set.package.at(5);
+     };
+     spec_name{
+         Spec_package_run_6;
+     };
+ }
+);
+
+run_6.result.state_machine.sm;
+
 /*
 Simulation{
     Start{Spec_package_run_1;};
