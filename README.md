@@ -84,7 +84,9 @@ Missing: Learning multiple juxtaposed occurences of the same element. Seeing the
     };
 ```
 
-the algorithm should learn that there can be up to two *owner*-fields.
+the algorithm should learn that there can be up to two *owner*-fields:
+
+![](img/status_implementation3.png)
 
 
 
