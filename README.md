@@ -88,6 +88,18 @@ the algorithm should learn that there can be up to two *owner*-fields:
 
 ![](img/status_implementation3.png)
 
+### Step 4
+
+```
+    package{
+        owner{"random guy";};
+        exports{E1;};
+        imports{M1;M2;M3;};
+        version{1;};
+    };
+
+```
+
 
 
 
