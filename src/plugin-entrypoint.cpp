@@ -168,6 +168,7 @@ namespace learn_structs{
             bool connected(state_it from, state_it to);
             state_it copy(state_it);
             vector<state_it> predecessors(state_it);
+            vector<state_it> successors(state_it);
     };
 
     class Learner{
@@ -219,7 +220,13 @@ namespace learn_structs{
                         }
                         //INVARIANT: Cases are clear ('it' points to the correct index in each possible b case)
                         if (*it == spec.get_current_state_idx()){ //b-3
-
+                            auto from = spec.get_current_state_idx();
+                            //auto new_succ = spec.successors(from);
+                            auto to = spec.copy(from);
+                            //spec.states[to].neighbors = new_succ;
+                            spec.states[to].neighbors = {};
+                            spec.connect(from, to);
+                            spec.move_to(to);
                         } else { // b-1, b-2
                             if (spec.connected(*it,spec.get_current_state_idx()) ){
                                 //cycle
@@ -258,6 +265,10 @@ namespace learn_structs{
         for(auto e: states)
          for (auto ee: e.neighbors) if (ee == s) r.push_back(e.pos);
         return r;
+    }
+    
+    vector<Spec::state_it> Spec::successors(state_it it){
+        return states[it].neighbors;
     }
 
     string Spec::new_id(string name) {
