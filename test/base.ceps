@@ -48,6 +48,17 @@ test_set{
         imports{M1;M2;M3;};
         version{1;};
     };
+    package{
+        owner{"random guy";};
+        owner{"random guy";};
+        owner{"random guy";};
+        owner{"random guy";};
+        owner{"random guy";};
+        exports{E1;};
+        imports{M1;M2;M3;};
+        version{1;};
+    };
+
 };
 
 val run_1 = learn_struct(
@@ -142,6 +153,25 @@ val run_6 = learn_struct(
 );
 
 run_6.result.state_machine.sm;
+
+val run_7 = learn_struct(
+ input{
+     test_set{
+         root.test_set.package.at(0);
+         root.test_set.package.at(1);
+         root.test_set.package.at(2);
+         root.test_set.package.at(3);
+         root.test_set.package.at(4);
+         root.test_set.package.at(5);
+         root.test_set.package.at(6);
+     };
+     spec_name{
+         Spec_package_run_7;
+     };
+ }
+);
+
+run_7.result.state_machine.sm;
 
 /*
 Simulation{
